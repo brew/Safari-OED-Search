@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<script type="text/javascript">
+
+	var hasLoggedIn = false;
+
+	function performCommand(event) {
+		if (event.command === "search_oed_for_phrase") {
+			var libraryCardNum = safari.extension.settings.getItem('libraryCardNumber');
+			if (!hasLoggedIn && libraryCardNum) {
+				sendRequest('http://dictionary.oed.com/cgi/lclogin', function(req){doOEDSearch(event.userInfo);}, 'library_card_number='+libraryCardNum);
+				hasLoggedIn = true;
+			} else {
+				doOEDSearch(event.userInfo);
+			}
+		}
+	}
+	
+	function performValidate(event) {
+    if (event.command === "search_oed_for_phrase") {
+			var phrase = event.userInfo;
+ 	  	if (!phrase || phrase.length == 0) {
+	    	event.target.disabled = true;
+	   	} else if (phrase.length > 25) {
+	   		phrase = phrase.substr(0,25);
+	   		phrase = phrase + '...';
+			}
+	   	event.target.title = 'Look Up "' + phrase + '" in OED';
+		}
+	}
+	safari.application.addEventListener("command", performCommand, false);
+	safari.application.addEventListener("validate", performValidate, false);
+	
+	function doOEDSearch(phrase) {
+		var url = "http://dictionary.oed.com/cgi/findword?query_type=word&queryword=" + phrase;
+		
+		// //pronuncuation
+		// url += ("&p="+safari.extension.settings.getItem('pronuncuation'));
+		// // quotations
+		// url += ("&qt="+safari.extension.settings.getItem('quotations'));
+		// // date chart
+		// url += ("&ct="+safari.extension.settings.getItem('date_chart'));
+		// // etymology
+		// url += ("&d="+safari.extension.settings.getItem('etymology'));
+
+		var tab = safari.application.activeBrowserWindow.openTab("foreground");
+    tab.url = url;
+	}
+	
+	// http://quirksmode.org/js/xmlhttp.html
+	function sendRequest(url,callback,postData) {
+		var req = new XMLHttpRequest();
+		if (!req) return;
+		var method = (postData) ? "POST" : "GET";
+		req.open(method,url,true);
+		if (postData)
+			req.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+		req.onreadystatechange = function () {
+			if (req.readyState != 4) return;
+			if (req.status != 200 && req.status != 304) {
+	//			alert('HTTP error ' + req.status);
+				return;
+			}
+			callback(req);
+		};
+		if (req.readyState == 4) return;
+		req.send(postData);
+	}
+	
+</script>
