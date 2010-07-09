@@ -41,7 +41,7 @@
 		</dict>
 	</dict>
 	<key>Description</key>
-	<string>A dictionary search of the OED using library card credentials</string>
+	<string>A dictionary search of the Oxford English Dictionary using library card credentials</string>
 	<key>ExtensionInfoDictionaryVersion</key>
 	<string>1.0</string>
 	<key>Permissions</key>
