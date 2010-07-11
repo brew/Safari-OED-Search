@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <script type="text/javascript">
 
-	var hasLoggedIn = false;
-
 	function performCommand(event) {
 		if (event.command === "search_oed_for_phrase") {
 			var libraryCardNum = safari.extension.settings.getItem('libraryCardNumber');
-			if (!hasLoggedIn && libraryCardNum) {
+			if (libraryCardNum) {
 				sendRequest('http://dictionary.oed.com/cgi/lclogin', function(req){doOEDSearch(event.userInfo);}, 'library_card_number='+libraryCardNum);
-				hasLoggedIn = true;
 			} else {
 				doOEDSearch(event.userInfo);
 			}
