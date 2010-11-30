@@ -7,6 +7,7 @@
       // console.log("Library card number: ", libraryCardNum);
 			if (libraryCardNum) {
         // console.log("About to send the login request.");
+        // The library login request must have a 'dest' value in the post request that resolves to a valid resource in the OED site.
 				sendRequest('http://www.oed.com/LIBRARY', function(req){console.log(req.responseText);doOEDSearch(event.userInfo);}, 'lib_card='+libraryCardNum+'&dest=/assets/ctx/20101129/images/favicon.ico');
 			} else {
         // console.log('Skipping libraryCardNum and going straight to search');
