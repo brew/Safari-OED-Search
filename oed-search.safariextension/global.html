@@ -3,10 +3,13 @@
 
 	function performCommand(event) {
 		if (event.command === "search_oed_for_phrase") {
-			var libraryCardNum = safari.extension.settings.getItem('libraryCardNumber');
+			var libraryCardNum = safari.extension.settings.getItem('libraryCardNumber');			
+      // console.log("Library card number: ", libraryCardNum);
 			if (libraryCardNum) {
-				sendRequest('http://dictionary.oed.com/cgi/lclogin', function(req){doOEDSearch(event.userInfo);}, 'library_card_number='+libraryCardNum);
+        // console.log("About to send the login request.");
+				sendRequest('http://www.oed.com/LIBRARY', function(req){console.log(req.responseText);doOEDSearch(event.userInfo);}, 'lib_card='+libraryCardNum+'&dest=/assets/ctx/20101129/images/favicon.ico');
 			} else {
+        // console.log('Skipping libraryCardNum and going straight to search');
 				doOEDSearch(event.userInfo);
 			}
 		}
@@ -28,23 +31,15 @@
 	safari.application.addEventListener("validate", performValidate, false);
 	
 	function doOEDSearch(phrase) {
-		var url = "http://dictionary.oed.com/cgi/findword?query_type=word&queryword=" + phrase;
-		
-		// //pronuncuation
-		// url += ("&p="+safari.extension.settings.getItem('pronuncuation'));
-		// // quotations
-		// url += ("&qt="+safari.extension.settings.getItem('quotations'));
-		// // date chart
-		// url += ("&ct="+safari.extension.settings.getItem('date_chart'));
-		// // etymology
-		// url += ("&d="+safari.extension.settings.getItem('etymology'));
+    // console.log("Searching for", phrase);
+		var url = "http://www.oed.com/search?q=" + phrase;
 
 		var tab = safari.application.activeBrowserWindow.openTab("foreground");
     tab.url = url;
 	}
 	
 	// http://quirksmode.org/js/xmlhttp.html
-	function sendRequest(url,callback,postData) {
+	function sendRequest(url, callback, postData) {
 		var req = new XMLHttpRequest();
 		if (!req) return;
 		var method = (postData) ? "POST" : "GET";
@@ -61,6 +56,6 @@
 		};
 		if (req.readyState == 4) return;
 		req.send(postData);
-	}
+	}	
 	
 </script>
