@@ -1,19 +1,29 @@
 <!DOCTYPE html>
 <script type="text/javascript">
 
+  var oedTab;
+  var searchFor;
+
 	function performCommand(event) {
 		if (event.command === "search_oed_for_phrase") {
 			var libraryCardNum = safari.extension.settings.getItem('libraryCardNumber');			
       // console.log("Library card number: ", libraryCardNum);
-			if (libraryCardNum) {
-        // console.log("About to send the login request.");
-        // The library login request must have a 'dest' value in the post request that resolves to a valid resource in the OED site.
-				sendRequest('http://www.oed.com/LIBRARY', function(req){doOEDSearch(event.userInfo);}, 'lib_card='+libraryCardNum+'&dest=/');
-			} else {
-        // console.log('Skipping libraryCardNum and going straight to search');
-				doOEDSearch(event.userInfo);
-			}
+      oedTab = safari.application.activeBrowserWindow.openTab('foreground');
+		  if (libraryCardNum) {
+        searchFor = event.userInfo;
+        oedTab.addEventListener("message", onOEDTabLoaded);
+      }
+      oedTab.url = "http://www.oed.com/search?q=" + event.userInfo;
 		}
+	}
+	
+	function onOEDTabLoaded(e) {
+	  if (e.name == "tabLoadedMessage") {
+      if (e.target.url.indexOf('authRejection') != -1) {
+        oedTab.page.dispatchMessage("prefillOEDLogin", {'libCardNum':safari.extension.settings.getItem('libraryCardNumber'), 'dest':'/search?q='+searchFor});
+      }
+  	  oedTab.removeEventListener("message", onOEDTabLoaded);
+	  }
 	}
 	
 	function performValidate(event) {
@@ -30,33 +40,5 @@
 	}
 	safari.application.addEventListener("command", performCommand, false);
 	safari.application.addEventListener("validate", performValidate, false);
-	
-	function doOEDSearch(phrase) {
-    // console.log("Searching for", phrase);
-		var url = "http://www.oed.com/search?q=" + phrase;
-
-		var tab = safari.application.activeBrowserWindow.openTab("foreground");
-    tab.url = url;
-	}
-	
-	// http://quirksmode.org/js/xmlhttp.html
-	function sendRequest(url, callback, postData) {
-		var req = new XMLHttpRequest();
-		if (!req) return;
-		var method = (postData) ? "POST" : "GET";
-		req.open(method,url,true);
-		if (postData)
-			req.setRequestHeader('Content-type','application/x-www-form-urlencoded');
-		req.onreadystatechange = function () {
-			if (req.readyState != 4) return;
-			if (req.status != 200 && req.status != 304) {
-	//			alert('HTTP error ' + req.status);
-				return;
-			}
-			callback(req);
-		};
-		if (req.readyState == 4) return;
-		req.send(postData);
-	}	
-	
+		
 </script>
